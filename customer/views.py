@@ -2,19 +2,17 @@ from .models import Customer
 from .serializers import CustomerSerializer
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.views import APIView
+from django.http import Http404
 
 
-@api_view(['GET', 'POST'])
-def get_customer_list(request):
-    if request.method == 'GET':
-        customer = Customer.objects.all()
-        print(customer)
-        serializer = CustomerSerializer(customer, many=True)
-        if len(customer) < 1:
-            return Response({'data': 'no customer found'}, status=status.HTTP_400_BAD_REQUEST)
+class GetCustomerList(APIView):
+    def get(self, request):
+        customers = Customer.objects.all()
+        serializer = CustomerSerializer(customers, many=True)
         return Response(serializer.data)
-    elif request.method == 'POST':
+
+    def post(self, request):
         serializer = CustomerSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -22,23 +20,28 @@ def get_customer_list(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'PUT', 'DELETE'])
-def get_customer(request, pk):
-    try:
-        customer = Customer.objects.get(pk=pk)
-    except Customer.DoesNotExist:
-        return Response({'data': 'customer not found'}, status=status.HTTP_404_NOT_FOUND)
+class GetCustomer(APIView):
 
-    if request.method == 'GET':
+    def get_customer(self, pk):
+        try:
+            return Customer.objects.get(pk=pk)
+        except Customer.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        customer = self.get_customer(pk)
         serializer = CustomerSerializer(customer)
         return Response(serializer.data)
 
-    elif request.method == 'PUT':
+    def put(self, request, pk):
+        customer = self.get_customer(pk)
         serializer = CustomerSerializer(customer, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    elif request.method == 'DELETE':
+
+    def delete(self, request, pk):
+        customer = self.get_customer(pk)
         customer.delete()
         return Response({'data': 'deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
