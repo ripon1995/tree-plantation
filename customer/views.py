@@ -1,46 +1,44 @@
 from .models import Customer
 from .serializers import CustomerSerializer
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.parsers import JSONParser
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.decorators import api_view
 
 
-@csrf_exempt
+@api_view(['GET', 'POST'])
 def get_customer_list(request):
     if request.method == 'GET':
         customer = Customer.objects.all()
         print(customer)
         serializer = CustomerSerializer(customer, many=True)
         if len(customer) < 1:
-            return JsonResponse({'data': 'no customer found'}, status=400)
-        return JsonResponse(serializer.data, safe=False)
+            return Response({'data': 'no customer found'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data)
     elif request.method == 'POST':
-        data = JSONParser().parse(request)
-        serializer = CustomerSerializer(data=data)
+        serializer = CustomerSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@csrf_exempt
+@api_view(['GET', 'PUT', 'DELETE'])
 def get_customer(request, pk):
     try:
         customer = Customer.objects.get(pk=pk)
     except Customer.DoesNotExist:
-        return JsonResponse({'data': 'customer not found'}, status=404)
+        return Response({'data': 'customer not found'}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = CustomerSerializer(customer)
-        return JsonResponse(serializer.data)
+        return Response(serializer.data)
 
     elif request.method == 'PUT':
-        data = JSONParser().parse(request)
-        serializer = CustomerSerializer(customer, data=data)
+        serializer = CustomerSerializer(customer, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     elif request.method == 'DELETE':
         customer.delete()
-        return JsonResponse({'data': 'deleted successfully'}, status=204)
+        return Response({'data': 'deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
