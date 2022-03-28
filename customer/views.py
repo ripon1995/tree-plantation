@@ -1,47 +1,30 @@
 from .models import Customer
 from .serializers import CustomerSerializer
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.views import APIView
-from django.http import Http404
+from rest_framework import generics
+from rest_framework import mixins
 
 
-class GetCustomerList(APIView):
-    def get(self, request):
-        customers = Customer.objects.all()
-        serializer = CustomerSerializer(customers, many=True)
-        return Response(serializer.data)
+class GetCustomerList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
 
-    def post(self, request):
-        serializer = CustomerSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
 
 
-class GetCustomer(APIView):
+class GetCustomer(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin,
+                  generics.GenericAPIView):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
 
-    def get_customer(self, pk):
-        try:
-            return Customer.objects.get(pk=pk)
-        except Customer.DoesNotExist:
-            raise Http404
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
 
-    def get(self, request, pk):
-        customer = self.get_customer(pk)
-        serializer = CustomerSerializer(customer)
-        return Response(serializer.data)
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
 
-    def put(self, request, pk):
-        customer = self.get_customer(pk)
-        serializer = CustomerSerializer(customer, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk):
-        customer = self.get_customer(pk)
-        customer.delete()
-        return Response({'data': 'deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
