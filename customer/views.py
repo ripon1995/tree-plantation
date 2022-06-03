@@ -21,9 +21,10 @@ class CustomerSignUp(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         valid = serializer.is_valid()
         if not valid:
+            error_list = [serializer.errors[error][0] for error in serializer.errors]
             data = {
                 'message': 'fail',
-                'data': serializer.errors
+                'data': error_list[0]
             }
             return Response(data=data)
         response = super().create(request, *args, **kwargs)
