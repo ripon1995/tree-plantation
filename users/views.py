@@ -1,3 +1,12 @@
-from django.shortcuts import render
+from djoser.views import UserViewSet as DjoserUserViewSet
 
-# Create your views here.
+#
+# class UserViewSet(DjoserUserViewSet):
+#     def perform_create(self, serializer):
+#         if not serializer.is_valid():
+#             data = {
+#                 "message": 'fail'
+#             }
+#             return data
+#
+#         return serializer
