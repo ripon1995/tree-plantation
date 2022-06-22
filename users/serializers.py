@@ -4,12 +4,11 @@ from rest_framework import serializers
 
 
 class UsersCreateSerializer(UserCreateSerializer):
-
     class Meta(UserCreateSerializer.Meta):
         model = get_user_model()
         fields = ['id', 'email', 'name', 'username', 'password', 'phone']
 
     def to_representation(self, instance):
         representation = super(UserCreateSerializer, self).to_representation(instance)
-        body = {'body': representation, 'message': 'success'}
-        return body
+        custom_success_response = {'message': 'success', 'body': representation, }
+        return custom_success_response
