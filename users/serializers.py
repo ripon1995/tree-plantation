@@ -1,14 +1,13 @@
-from djoser.serializers import UserCreateSerializer
+from djoser.serializers import UserCreateSerializer as BaseUserRegistrationSerializer
 from django.contrib.auth import get_user_model
-from rest_framework import serializers
 
 
-class UsersCreateSerializer(UserCreateSerializer):
-    class Meta(UserCreateSerializer.Meta):
+class UsersCreateSerializer(BaseUserRegistrationSerializer):
+    class Meta(BaseUserRegistrationSerializer.Meta):
         model = get_user_model()
         fields = ['id', 'email', 'name', 'username', 'password', 'phone']
 
     def to_representation(self, instance):
-        representation = super(UserCreateSerializer, self).to_representation(instance)
+        representation = super(BaseUserRegistrationSerializer, self).to_representation(instance)
         custom_success_response = {'message': 'success', 'body': representation, }
         return custom_success_response
