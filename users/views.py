@@ -1,7 +1,7 @@
-
-from .serializers import UsersCreateSerializer
-from rest_framework import generics
+from .serializers import UsersCreateSerializer, UserProfileSerializer
+from rest_framework import generics, viewsets
 from rest_framework.response import Response
+from .models import UserAccount
 
 
 class CustomRegistrationView(generics.CreateAPIView):
@@ -18,3 +18,14 @@ class CustomRegistrationView(generics.CreateAPIView):
         response = super().create(request, *args, **kwargs)
         data = {'message': 'success', 'data': response.data}
         return Response(data=data)
+
+
+class CustomProfileView(generics.RetrieveAPIView):
+    queryset = UserAccount.objects.all()
+    serializer_class = UserProfileSerializer
+
+    def get(self, request, *args, **kwargs):
+        queryset = self.queryset.filter(pk=request.user.id).first()
+        serializer = self.get_serializer(request.user)
+
+        return Response({"message": "success", "data": serializer.data})
