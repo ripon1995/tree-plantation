@@ -1,7 +1,8 @@
 from .serializers import UsersCreateSerializer, UserProfileSerializer
-from rest_framework import generics, viewsets
+from rest_framework import generics
 from rest_framework.response import Response
 from .models import UserAccount
+from rest_framework.permissions import IsAuthenticated
 
 
 class CustomRegistrationView(generics.CreateAPIView):
@@ -21,11 +22,11 @@ class CustomRegistrationView(generics.CreateAPIView):
 
 
 class CustomProfileView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = UserAccount.objects.all()
     serializer_class = UserProfileSerializer
 
-    def get(self, request, *args, **kwargs):
+    def retrieve(self, request, *args, **kwargs):
         queryset = self.queryset.filter(pk=request.user.id).first()
         serializer = self.get_serializer(request.user)
-
-        return Response({"message": "success", "data": serializer.data})
+        return Response({"message": "success", "detail": serializer.data})
