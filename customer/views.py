@@ -1,33 +1,32 @@
 from .models import Customer
-from .serializers import CustomerSerializer, CustomerSignUpSerializer
+from .serializers import CustomerSerializer
 from rest_framework import generics
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 
-class GetCustomerList(generics.ListCreateAPIView):
-    queryset = Customer.objects.all()
+class CreateCustomerDetails(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = CustomerSerializer
-
-
-class GetCustomer(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Customer.objects.all()
-    serializer_class = CustomerSerializer
-
-
-class CustomerSignUp(generics.CreateAPIView):
-    serializer_class = CustomerSignUpSerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         valid = serializer.is_valid()
         if not valid:
-            #error_list = [serializer.errors[error][0] for error in serializer.errors]
-            #print(serializer.errors)
             data = {'message': 'fail', 'data': {key: val[0].title() for key, val in serializer.errors.items()}}
             return Response(data=data)
+
         response = super().create(request, *args, **kwargs)
-        data = {
-            'message': 'success',
-            'data': response.data
-        }
+        data = {'message': 'success', 'data': response.data}
         return Response(data=data)
+
+
+class GetCustomerDetails(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response({"message": "success", "data": serializer.data})
