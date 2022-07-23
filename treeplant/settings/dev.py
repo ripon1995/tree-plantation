@@ -8,7 +8,7 @@ ALLOWED_HOSTS = ['172.16.226.179', 'desktop-psr46s4.brainstation-23', '10.0.2.2:
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'tree',
+        'NAME': 'tree_data',
         'HOST': 'localhost',
         'USER': "postgres",
         'PASSWORD': 'rootless'
