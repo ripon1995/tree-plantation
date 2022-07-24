@@ -21,12 +21,18 @@ class CreateCustomerDetails(generics.CreateAPIView):
         return Response(data=data)
 
 
-class GetCustomerDetails(generics.RetrieveAPIView):
+class GetCustomerDetails(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
 
     def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response({"message": "success", "data": serializer.data})
+
+    def update(self, request, *args, **kwargs):
+        super(GetCustomerDetails, self).update(request, *args, **kwargs)
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return Response({"message": "success", "data": serializer.data})
