@@ -31,6 +31,7 @@ class GetCustomerDetails(generics.RetrieveUpdateDestroyAPIView):
         serializer = self.get_serializer(instance)
         return Response({"message": "success", "data": serializer.data})
 
+    # update endpoint added
     def update(self, request, *args, **kwargs):
         super(GetCustomerDetails, self).update(request, *args, **kwargs)
         instance = self.get_object()
