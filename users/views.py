@@ -2,10 +2,11 @@ from .serializers import UsersCreateSerializer, UserProfileSerializer
 from rest_framework import generics
 from rest_framework.response import Response
 from .models import UserAccount
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
 class CustomRegistrationView(generics.CreateAPIView):
+    permission_classes = [AllowAny]
     serializer_class = UsersCreateSerializer
 
     def create(self, request, *args, **kwargs):
